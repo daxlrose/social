@@ -1,6 +1,5 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
-using Social.Domain.Models;
 
 namespace Social.Api.Controllers.V1
 {
@@ -13,8 +12,7 @@ namespace Social.Api.Controllers.V1
         [Route("{id}")]
         public IActionResult GetById(int id)
         {
-            var post = new Post { Id = id, Text = "sml" };
-            return Ok(post);
+            return Ok();
         }
     }
 }
