@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Social.Dal.Configurations;
 using Social.Domain.Aggregates.PostAggregate;
 using Social.Domain.Aggregates.UserProfileAggregate;
-using System.Reflection.Emit;
 
 namespace Social.Dal
 {
