@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using Social.Api.Filters;
 
 namespace Social.Api.Registers
 {
@@ -6,7 +7,10 @@ namespace Social.Api.Registers
     {
         public void RegisterServices(WebApplicationBuilder builder)
         {
-            builder.Services.AddControllers();
+            builder.Services.AddControllers(config =>
+            {
+                config.Filters.Add(typeof(SocialExceptionHandler));
+            });
 
             builder.Services.AddApiVersioning(config =>
             {

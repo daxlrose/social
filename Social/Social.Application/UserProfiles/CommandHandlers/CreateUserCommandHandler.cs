@@ -1,11 +1,12 @@
 ﻿using MediatR;
+using Social.Application.Models;
 using Social.Application.UserProfiles.Commands;
 using Social.Dal;
 using Social.Domain.Aggregates.UserProfileAggregate;
 
 namespace Social.Application.UserProfiles.CommandHandlers
 {
-    public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserProfile>
+    internal class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, OperationResult<UserProfile>>
     {
         private readonly DataContext _ctx;
         public CreateUserCommandHandler(DataContext ctx)
@@ -13,8 +14,9 @@ namespace Social.Application.UserProfiles.CommandHandlers
             _ctx = ctx;
         }
 
-        public async Task<UserProfile> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+        public async Task<OperationResult<UserProfile>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
+            var result = new OperationResult<UserProfile>();
 
             var basicInfo = BasicInfo.CreateBasicInfo(request.FirstName, request.LastName,
                 request.EmailAddress, request.Phone, request.DateOfBirth, request.CurrentCity);
@@ -24,7 +26,9 @@ namespace Social.Application.UserProfiles.CommandHandlers
             _ctx.UserProfiles.Add(userProfile);
             await _ctx.SaveChangesAsync();
 
-            return userProfile;
+            result.Payload = userProfile;
+
+            return result;
         }
     }
 }
