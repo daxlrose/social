@@ -41,7 +41,7 @@ namespace Social.Api.Controllers.V1
             var response = await _mediator.Send(command);
             var userProfile = _mapper.Map<UserProfileResponse>(response.Payload);
 
-            return CreatedAtAction(nameof(GetUserProfileById),
+            return response.IsError ? HandleErrorResponse(response.Errors) : CreatedAtAction(nameof(GetUserProfileById),
                 new { id = userProfile.UserProfileId }, userProfile);
         }
 

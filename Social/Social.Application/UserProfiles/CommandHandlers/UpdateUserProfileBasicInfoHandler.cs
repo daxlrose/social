@@ -5,6 +5,7 @@ using Social.Application.Models;
 using Social.Application.UserProfiles.Commands;
 using Social.Dal;
 using Social.Domain.Aggregates.UserProfileAggregate;
+using Social.Domain.Exceptions;
 
 namespace Social.Application.UserProfiles.CommandHandlers
 {
@@ -48,13 +49,27 @@ namespace Social.Application.UserProfiles.CommandHandlers
                 result.Payload = userProfile;
                 return result;
             }
+            catch (UserProfileNotValidException ex)
+            {
+                result.IsError = true;
+                ex.ValidationErrors.ForEach(e =>
+                {
+                    var error = new Error
+                    {
+                        Code = ErrorCode.ValidationError,
+                        Message = $"{ex.Message}"
+                    };
+                    result.Errors.Add(error);
+                });
+
+                return result;
+            }
             catch (Exception e)
             {
                 var error = new Error { Code = ErrorCode.ServerError, Message = e.Message };
                 result.IsError = true;
                 result.Errors.Add(error);
             }
-
             return result;
         }
     }
