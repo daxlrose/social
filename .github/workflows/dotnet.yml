@@ -18,8 +18,8 @@ jobs:
       with:
         dotnet-version: 7.0.x
     - name: Restore dependencies
-      run: dotnet restore ../../Social/
+      run: dotnet restore Social
     - name: Build
-      run: dotnet build ../../Social/ --no-restore
+      run: dotnet build Social --no-restore
     - name: Test
-      run: dotnet test dotnet build ../../Social/ --no-restore --no-build
+      run: dotnet test Social --no-restore --no-build
