@@ -26,8 +26,4 @@
     <ProjectReference Include="..\Social.Domain\Social.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Contracts\Posts\Requests\" />
-  </ItemGroup>
-
 </Project>
