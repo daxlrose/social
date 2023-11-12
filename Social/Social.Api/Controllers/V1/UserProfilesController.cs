@@ -1,6 +1,8 @@
 ﻿using Asp.Versioning;
 using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Social.Api.Contracts.UserProfiles.Requests;
 using Social.Api.Contracts.UserProfiles.Responses;
@@ -13,6 +15,7 @@ namespace Social.Api.Controllers.V1
     [ApiVersion("1.0")]
     [Route(ApiRoutes.BaseRoute)]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class UserProfilesController : BaseController
     {
         private readonly IMediator _mediator;

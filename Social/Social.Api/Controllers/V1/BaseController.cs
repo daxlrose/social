@@ -23,11 +23,11 @@ namespace Social.Api.Controllers.V1
                 return NotFound(apiError);
             }
 
-            apiError.StatusCode = 500;
-            apiError.StatusPhrase = "Internal server error";
+            apiError.StatusCode = 400;
+            apiError.StatusPhrase = "Bad request";
             apiError.Timestamp = DateTime.Now;
-            apiError.Errors.Add("Unknown error");
-            return StatusCode(500, apiError);
+            errors.ForEach(e => apiError.Errors.Add(e.Message));
+            return StatusCode(400, apiError);
         }
     }
 }
