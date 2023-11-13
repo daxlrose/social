@@ -25,14 +25,29 @@ namespace Social.Api.Controllers.V1
         [HttpPost]
         [Route(ApiRoutes.Identity.Registration)]
         [ValidateModel]
-        public async Task<IActionResult> Register(UserRegistration userRegistration)
+        public async Task<IActionResult> Register(UserRegistration userRegistration, CancellationToken cancellationToken)
         {
             var command = _mapper.Map<RegisterIdentity>(userRegistration);
-            var result = await _mediator.Send(command);
+            var result = await _mediator.Send(command, cancellationToken);
 
             if (result.IsError) return HandleErrorResponse(result.Errors);
 
             var authenticationResult = new AuthenticationResult() { Token = result.Payload };
+
+            return Ok(authenticationResult);
+        }
+
+        [HttpPost]
+        [Route(ApiRoutes.Identity.Login)]
+        [ValidateModel]
+        public async Task<IActionResult> Login(Login login, CancellationToken cancellationToken)
+        {
+            var command = _mapper.Map<LoginCommand>(login);
+            var result = await _mediator.Send(command, cancellationToken);
+
+            if (result.IsError) return HandleErrorResponse(result.Errors);
+
+            var authenticationResult = new AuthenticationResult { Token = result.Payload };
 
             return Ok(authenticationResult);
         }

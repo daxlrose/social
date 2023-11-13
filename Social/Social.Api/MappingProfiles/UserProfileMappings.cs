@@ -10,7 +10,6 @@ namespace Social.Api.MappingProfiles
     {
         public UserProfileMappings()
         {
-            CreateMap<UserProfileCreateUpdate, CreateUserCommand>();
             CreateMap<UserProfileCreateUpdate, UpdateUserProfileBasicInfo>();
             CreateMap<UserProfile, UserProfileResponse>()
                 .ForMember(dest => dest.UserProfileId, opts => opts.MapFrom(src => src.Id));

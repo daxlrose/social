@@ -25,7 +25,7 @@ namespace Social.Application.UserProfiles.CommandHandlers
             try
             {
                 var userProfile = await _ctx.UserProfiles
-                    .FirstOrDefaultAsync(up => up.Id == request.UserProfileId);
+                    .FirstOrDefaultAsync(up => up.Id == request.UserProfileId, cancellationToken);
 
                 if (userProfile is null)
                 {
@@ -44,7 +44,7 @@ namespace Social.Application.UserProfiles.CommandHandlers
                 userProfile.UpdateBasicInfo(basicInfo);
 
                 _ctx.UserProfiles.Update(userProfile);
-                await _ctx.SaveChangesAsync();
+                await _ctx.SaveChangesAsync(cancellationToken);
 
                 result.Payload = userProfile;
                 return result;

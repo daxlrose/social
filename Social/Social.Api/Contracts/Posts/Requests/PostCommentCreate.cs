@@ -6,8 +6,5 @@ namespace Social.Api.Contracts.Posts.Requests
     {
         [Required]
         public string Text { get; set; }
-
-        [Required]
-        public string UserProfileId { get; set; }
     }
 }

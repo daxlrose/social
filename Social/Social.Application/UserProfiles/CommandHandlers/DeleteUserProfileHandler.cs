@@ -20,7 +20,7 @@ namespace Social.Application.UserProfiles.CommandHandlers
             var result = new OperationResult<UserProfile>();
 
             var userProfile = await _ctx.UserProfiles
-                .FirstOrDefaultAsync(up => up.Id == request.UserProfileId);
+                .FirstOrDefaultAsync(up => up.Id == request.UserProfileId, cancellationToken);
 
             if (userProfile is null)
             {
@@ -35,7 +35,7 @@ namespace Social.Application.UserProfiles.CommandHandlers
             }
 
             _ctx.UserProfiles.Remove(userProfile);
-            await _ctx.SaveChangesAsync();
+            await _ctx.SaveChangesAsync(cancellationToken);
 
             result.Payload = userProfile;
             return result;

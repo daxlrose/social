@@ -23,7 +23,7 @@ namespace Social.Application.UserProfiles.QueryHandlers
             var result = new OperationResult<UserProfile>();
 
             var profile = await _ctx.UserProfiles
-                .FirstOrDefaultAsync(up => up.Id == request.UserProfileId);
+                .FirstOrDefaultAsync(up => up.Id == request.UserProfileId, cancellationToken);
 
             if (profile is null)
             {

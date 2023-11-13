@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Social.Api.Contracts.Common;
 using Social.Api.Contracts.Posts.Requests;
 using Social.Api.Contracts.Posts.Responses;
+using Social.Api.Extensions;
 using Social.Api.Filters;
 using Social.Application.Posts.Commands;
 using Social.Application.Posts.Queries;
@@ -25,9 +26,9 @@ namespace Social.Api.Controllers.V1
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllPosts()
+        public async Task<IActionResult> GetAllPosts(CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(new GetAllPosts());
+            var result = await _mediator.Send(new GetAllPosts(), cancellationToken);
             var mapped = _mapper.Map<List<PostResponse>>(result.Payload);
             return result.IsError ? HandleErrorResponse(result.Errors) : Ok(mapped);
 
@@ -36,11 +37,11 @@ namespace Social.Api.Controllers.V1
         [HttpGet]
         [Route(ApiRoutes.Posts.IdRoute)]
         [ValidateGuid("id")]
-        public async Task<IActionResult> GetById(string id)
+        public async Task<IActionResult> GetById(string id, CancellationToken cancellationToken)
         {
             var postId = Guid.Parse(id);
             var query = new GetPostById() { PostId = postId };
-            var result = await _mediator.Send(query);
+            var result = await _mediator.Send(query, cancellationToken);
             var mapped = _mapper.Map<PostResponse>(result.Payload);
 
             return result.IsError ? HandleErrorResponse(result.Errors) : Ok(mapped);
@@ -48,15 +49,17 @@ namespace Social.Api.Controllers.V1
 
         [HttpPost]
         [ValidateModel]
-        public async Task<IActionResult> CreatePost([FromBody] PostCreate newPost)
+        public async Task<IActionResult> CreatePost([FromBody] PostCreate newPost, CancellationToken cancellationToken)
         {
+            var userProfileId = HttpContext.GetUserProfileIdClaimValue();
+
             var command = new CreatePost()
             {
-                UserProfileId = Guid.Parse(newPost.UserProfileId),
+                UserProfileId = userProfileId,
                 TextContent = newPost.TextContent
             };
 
-            var result = await _mediator.Send(command);
+            var result = await _mediator.Send(command, cancellationToken);
             var mapped = _mapper.Map<PostResponse>(result.Payload);
 
             return result.IsError ? HandleErrorResponse(result.Errors)
@@ -67,14 +70,17 @@ namespace Social.Api.Controllers.V1
         [Route(ApiRoutes.Posts.IdRoute)]
         [ValidateGuid("id")]
         [ValidateModel]
-        public async Task<IActionResult> UpdatePostText([FromBody] PostUpdate updatedPost, string id)
+        public async Task<IActionResult> UpdatePostText([FromBody] PostUpdate updatedPost, string id, CancellationToken cancellationToken)
         {
+            var userProfileId = HttpContext.GetUserProfileIdClaimValue();
+
             var command = new UpdatePostText()
             {
                 NewText = updatedPost.Text,
-                PostId = Guid.Parse(id)
+                PostId = Guid.Parse(id),
+                UserProfileId = userProfileId
             };
-            var result = await _mediator.Send(command);
+            var result = await _mediator.Send(command, cancellationToken);
 
             return result.IsError ? HandleErrorResponse(result.Errors) : NoContent();
         }
@@ -82,10 +88,11 @@ namespace Social.Api.Controllers.V1
         [HttpDelete]
         [Route(ApiRoutes.Posts.IdRoute)]
         [ValidateGuid("id")]
-        public async Task<IActionResult> DeletePost(string id)
+        public async Task<IActionResult> DeletePost(string id, CancellationToken cancellationToken)
         {
-            var command = new DeletePost() { PostId = Guid.Parse(id) };
-            var result = await _mediator.Send(command);
+            var userProfileId = HttpContext.GetUserProfileIdClaimValue();
+            var command = new DeletePost() { PostId = Guid.Parse(id), UserProfileId = userProfileId };
+            var result = await _mediator.Send(command, cancellationToken);
 
             return result.IsError ? HandleErrorResponse(result.Errors) : NoContent();
         }
@@ -93,10 +100,10 @@ namespace Social.Api.Controllers.V1
         [HttpGet]
         [Route(ApiRoutes.Posts.PostComments)]
         [ValidateGuid("postId")]
-        public async Task<IActionResult> GetCommentsByPostId(string postId)
+        public async Task<IActionResult> GetCommentsByPostId(string postId, CancellationToken cancellationToken)
         {
             var query = new GetPostComments() { PostId = Guid.Parse(postId) };
-            var result = await _mediator.Send(query);
+            var result = await _mediator.Send(query, cancellationToken);
 
             if (result.IsError) HandleErrorResponse(result.Errors);
 
@@ -108,20 +115,9 @@ namespace Social.Api.Controllers.V1
         [Route(ApiRoutes.Posts.PostComments)]
         [ValidateGuid("postId")]
         [ValidateModel]
-        public async Task<IActionResult> AddCommentToPost(string postId, [FromBody] PostCommentCreate comment)
+        public async Task<IActionResult> AddCommentToPost(string postId, [FromBody] PostCommentCreate comment, CancellationToken cancellationToken)
         {
-            var isValidGuid = Guid.TryParse(comment.UserProfileId, out var userProfileId);
-            if (!isValidGuid)
-            {
-                var apiError = new ErrorResponse();
-
-                apiError.StatusCode = 400;
-                apiError.StatusPhrase = "Bad Request";
-                apiError.Timestamp = DateTime.Now;
-                apiError.Errors.Add("Provided User profile id is not in a valid Guid format");
-
-                return BadRequest(apiError);
-            }
+            var userProfileId = HttpContext.GetUserProfileIdClaimValue();
 
             var command = new AddPostComment()
             {
@@ -130,7 +126,7 @@ namespace Social.Api.Controllers.V1
                 CommentText = comment.Text
             };
 
-            var result = await _mediator.Send(command);
+            var result = await _mediator.Send(command, cancellationToken);
 
             if (result.IsError) return HandleErrorResponse(result.Errors);
 

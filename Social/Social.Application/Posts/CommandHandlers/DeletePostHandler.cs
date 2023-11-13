@@ -22,7 +22,7 @@ namespace Social.Application.Posts.CommandHandlers
             var result = new OperationResult<Post>();
             try
             {
-                var post = await _ctx.Posts.FirstOrDefaultAsync(p => p.PostId == request.PostId);
+                var post = await _ctx.Posts.FirstOrDefaultAsync(p => p.PostId == request.PostId, cancellationToken);
 
                 if (post is null)
                 {
@@ -36,8 +36,20 @@ namespace Social.Application.Posts.CommandHandlers
                     return result;
                 }
 
+                if (post.UserProfileId != request.UserProfileId)
+                {
+                    result.IsError = true;
+                    var error = new Error
+                    {
+                        Code = ErrorCode.PostDeleteNotPossible,
+                        Message = $"Only the owner of a post can delete it"
+                    };
+                    result.Errors.Add(error);
+                    return result;
+                }
+
                 _ctx.Posts.Remove(post);
-                await _ctx.SaveChangesAsync();
+                await _ctx.SaveChangesAsync(cancellationToken);
 
                 result.Payload = post;
             }
